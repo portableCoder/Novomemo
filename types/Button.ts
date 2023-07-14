@@ -1,6 +1,6 @@
 type Button = {
     icon: string | JSX.Element;
-    children: any;
+    children?: any;
     onClick?: () => void;
     active?: boolean
 } & React.HTMLAttributes<HTMLButtonElement>

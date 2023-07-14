@@ -6,5 +6,5 @@ type Note = {
     favorite: boolean,
     archived: boolean,
     editor: "markdown" | "wysiwyg"
-    id: string
+    id: number
 }

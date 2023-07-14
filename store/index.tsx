@@ -15,7 +15,13 @@ const useStore = create<NoteStore>()(
         notes,
       });
     },
-    sidebarOpen: false,
+    globalLoading: false,
+    setGlobalLoading(loading) {
+      set({
+        globalLoading: loading,
+      });
+    },
+    sidebarOpen: true,
     setSidebarOpen(arg) {
       set((prev) => ({ sidebarOpen: arg(prev.sidebarOpen) }));
     },
@@ -28,6 +34,19 @@ const useStore = create<NoteStore>()(
     supabase: createClient(),
     setSupabase(client) {
       set({ supabase: client });
+    },
+    editingNote: null,
+
+    setEditingNote(n) {
+      set({ editingNote: n });
+    },
+    isViewing: false,
+    setIsViewing(viewing) {
+      set({ isViewing: viewing });
+    },
+    isEditing: false,
+    setEditing(s) {
+      set({ isEditing: s });
     },
   }))
 );

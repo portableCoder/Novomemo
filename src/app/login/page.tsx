@@ -10,18 +10,23 @@ import useAuth from "@util/useAuth";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import useStore from "@store/index";
+import Modal, { LoadingModal } from "@components/Modal";
+import Spinner from "@components/Spinner";
 const page = () => {
   const session = useAuth();
-  const supabase = useStore((s) => s.supabase);
+  const [supabase, loading] = useStore((s) => [s.supabase, s.globalLoading]);
   const router = useRouter();
   useEffect(() => {
     if (session) {
-      router.push("/");
+      router.push("/app");
     }
   }, [session]);
   return (
-    <div className="w-full h-full flex items-center justify-center ">
-      <div className=" rounded-md my-auto flex items-center">
+    <div className="text-white w-full h-screen flex items-center justify-center ">
+      {loading && <LoadingModal />}
+
+      <div className=" rounded-md my-auto flex flex-col gap-y-2 items-center">
+        <div className="text-4xl">Novomemo</div>
         <Auth
           providers={[]}
           supabaseClient={supabase}
@@ -32,7 +37,7 @@ const page = () => {
               container:
                 "flex flex-col gap-y-3 w-full  rounded-md p-4 items-center justify-center text-white",
               label: "block",
-              button: "p-4 rounded-md bg-indigo-600 w-full",
+              button: "p-4  rounded-md bg-indigo-600 w-full",
               message:
                 "w-full text-center  flex items-center justify-center text-red-500",
               input:

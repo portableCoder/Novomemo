@@ -10,10 +10,12 @@ const MenuButton = ({ icon, children, onClick, active }: Button) => {
   return (
     <button
       onClick={onClick}
-      className={`${sel} items-center text-lg flex gap-x-2 p-4 hover:font-bold text-left capitalize rounded-md hover:bg-zinc-800 w-full`}
+      className={`${sel} items-center text-lg flex flex-col gap-y-2 gap-x-2 p-4 hover:font-bold justify-center capitalize rounded-md hover:bg-zinc-800 w-full`}
     >
       <div>{icon}</div>
-      <div className="flex justify-between w-full">{children}</div>
+      {children && (
+        <div className="flex justify-between w-full">{children}</div>
+      )}
     </button>
   );
 };

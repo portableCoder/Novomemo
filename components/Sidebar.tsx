@@ -1,6 +1,7 @@
 "use client";
 import {
   Archive,
+  ArrowLeft,
   Book,
   ChevronDown,
   Edit,
@@ -21,7 +22,6 @@ const menus = [
   [<Plus />, "Add note"],
   [<Edit />, "All notes"],
   [<Star />, "Favorites"],
-  [<Book />, "Scratchpad"],
   [<Archive />, "Archive"],
 ];
 
@@ -42,68 +42,47 @@ const Sidebar = () => {
 
   const setSidebarOpen = useStore((s) => s.setSidebarOpen);
   const supabase = useStore((s) => s.supabase);
+  const setLoading = useStore((s) => s.setGlobalLoading);
+  const notes = useStore((s) => s.notes);
   return (
-    <animated.div className="text-xl ">
-      <div className="h-full fixed px-4  bg-zinc-900 flex flex-col gap-y-1.5 outline outline-1 outline-zinc-800">
-        <div className="text-3xl px-4 my-2 flex  justify-between">
-          <div>Novomemo</div>
-          <button
-            onClick={() => {
-              setSidebarOpen((prev) => !prev);
-            }}
-            className="flex items-center"
-          >
-            <X />
-          </button>
-        </div>
-        {menus.map(([icon, text], i) => {
-          return (
+    <div className="h-full py-2 w-16 fixed top-0 left-0 justify-between items-center px-4  bg-zinc-900 flex flex-col gap-y-1.5 outline outline-1 outline-zinc-800">
+      <div className="text-3xl px-4 my-2 flex  justify-between">
+        <button
+          onClick={() => {
+            setSidebarOpen((prev) => !prev);
+          }}
+          className="flex items-center"
+        >
+          <ArrowLeft />
+        </button>
+      </div>
+      {menus.map(([icon, text], i) => {
+        return (
+          <div className="flex flex-col items-center justify-center p-2 text-xs">
             <MenuButton
               onClick={() => {
                 setSelectedMode(i);
               }}
               icon={icon}
               active={i === selectedMode}
-            >
-              {text}
-            </MenuButton>
-          );
-        })}
-        <MenuButton
-          onClick={() => {
-            setLabelOpen((prev) => !prev);
-          }}
-          icon={<Tag />}
-        >
-          <div className="flex gap-x-2">
-            Labels
-            <div className="bg-white w-6 h-6 flex items-center justify-center text-black rounded-full text-base">
-              {Labels.length}
-            </div>
+            ></MenuButton>
+            {text}
           </div>
-          <animated.div style={chevronSpring}>
-            <ChevronDown />
-          </animated.div>
-        </MenuButton>
+        );
+      })}
+      <div className="text-xs">
         <MenuButton
           onClick={async () => {
+            setLoading(true);
             const { error } = await supabase.auth.signOut();
+            setLoading(false);
           }}
           icon={<Key />}
-        >
-          Sign out
-        </MenuButton>
-        <animated.div
-          style={labelSpring}
-          className="grid grid-cols-3 gap-x-3 gap-y-2 px-4 overflow-hidden"
-        >
-          <Labels
-            items={["Health", "Office", "Work", "Chores"]}
-            selectedItems={() => {}}
-          />
-        </animated.div>
+        ></MenuButton>
+
+        {"Log Out"}
       </div>
-    </animated.div>
+    </div>
   );
 };
 
