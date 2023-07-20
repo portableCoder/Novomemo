@@ -6,9 +6,11 @@ import createClient from './createClient'
 
 const useAuth = () => {
 
-    const [session, setSession, setLoading] = useStore((s) => [s.session, s.setSession, s.setGlobalLoading])
+    const [session, setSession, setLoading, setSupabase] = useStore((s) => [s.session, s.setSession, s.setGlobalLoading, s.setSupabase])
     useEffect(() => {
+
         const supabase = createClient()
+        setSupabase(supabase)
         supabase.auth.getSession().then(({ data: { session } }) => {
             setSession(session)
         })
@@ -17,6 +19,7 @@ const useAuth = () => {
             data: { subscription },
         } = supabase.auth.onAuthStateChange((_event, session) => {
             setSession(session)
+            console.log(_event)
             setLoading(false)
         })
 

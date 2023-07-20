@@ -12,9 +12,16 @@ export default function AppLayout({
 }) {
   const session = useAuth();
   const router = useRouter();
+  const [localMode, setLocalMode] = useStore(({ localMode, setLocalMode }) => [
+    localMode,
+    setLocalMode,
+  ]);
   useEffect(() => {
-    if (!session) {
+    if (!session && !localMode) {
       router.push("/login");
+    }
+    if (session) {
+      setLocalMode(false);
     }
   }, [session]);
   const [loading] = useStore((s) => [s.globalLoading]);

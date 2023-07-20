@@ -27,8 +27,26 @@
     @apply font-semibold;
   }
 }
+.btn {
+  @apply w-full rounded-md p-4 flex items-center justify-center bg-indigo-500 hover:bg-indigo-400;
+}
 body,
 html {
   @apply bg-zinc-950;
   overflow-x: hidden;
+}
+select > option {
+  @apply bg-zinc-800 /* Or an hexadecimal value */;
+}
+
+.grad {
+  background-color: #99fff3;
+  background-image: radial-gradient(
+      at 34% 87%,
+      hsla(139, 91%, 72%, 1) 0px,
+      transparent 50%
+    ),
+    radial-gradient(at 82% 92%, hsla(309, 95%, 77%, 1) 0px, transparent 50%),
+    radial-gradient(at 37% 56%, hsla(286, 93%, 68%, 1) 0px, transparent 50%),
+    radial-gradient(at 31% 62%, hsla(151, 90%, 77%, 1) 0px, transparent 50%);
 }

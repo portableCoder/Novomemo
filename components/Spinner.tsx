@@ -4,7 +4,7 @@ import { Loader } from "react-feather";
 const Spinner = () => {
   return (
     <div className="">
-      <Loader className="animate-spin text-3xl " />
+      <Loader className="animate-spin text-6xl " />
     </div>
   );
 };

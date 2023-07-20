@@ -12,7 +12,7 @@ import dynamic from "next/dynamic";
 import useStore from "@store/index";
 import Modal, { LoadingModal } from "@components/Modal";
 import Spinner from "@components/Spinner";
-const page = () => {
+const Login = () => {
   const session = useAuth();
   const [supabase, loading] = useStore((s) => [s.supabase, s.globalLoading]);
   const router = useRouter();
@@ -27,27 +27,30 @@ const page = () => {
 
       <div className=" rounded-md my-auto flex flex-col gap-y-2 items-center">
         <div className="text-4xl">Novomemo</div>
-        <Auth
-          providers={[]}
-          supabaseClient={supabase}
-          appearance={{
-            extend: false,
+        {supabase && (
+          <Auth
+            providers={[]}
+            supabaseClient={supabase}
+            redirectTo="/login/reset"
+            appearance={{
+              extend: false,
 
-            className: {
-              container:
-                "flex flex-col gap-y-3 w-full  rounded-md p-4 items-center justify-center text-white",
-              label: "block",
-              button: "p-4  rounded-md bg-indigo-600 w-full",
-              message:
-                "w-full text-center  flex items-center justify-center text-red-500",
-              input:
-                "focus:border-indigo-700 w-full focus:outline-none  block text-white p-4 bg-transparent border-2 border-zinc-600 rounded-md ",
-            },
-          }}
-        />{" "}
+              className: {
+                container:
+                  "flex flex-col gap-y-3 w-full  rounded-md p-4 items-center justify-center text-white",
+                label: "block",
+                button: "p-4  rounded-md bg-indigo-600 w-full",
+                message:
+                  "w-full text-center  flex items-center justify-center text-red-500",
+                input:
+                  "focus:border-indigo-700 w-full focus:outline-none  block text-white p-4 bg-transparent border-2 border-zinc-600 rounded-md ",
+              },
+            }}
+          />
+        )}{" "}
       </div>
     </div>
   );
 };
 
-export default page;
+export default dynamic(() => Promise.resolve(Login), { ssr: false });

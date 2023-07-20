@@ -1,6 +1,5 @@
 import "./globals.css";
 import "react-quill/dist/quill.snow.css";
-import "react-loading-skeleton/dist/skeleton.css";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 
 import { Poppins } from "next/font/google";

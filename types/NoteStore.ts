@@ -3,6 +3,8 @@ import { Menu } from "@util/Menu"
 
 interface NoteStore {
     notes: Note[]
+    localMode: boolean,
+    setLocalMode: (s: boolean) => void
     globalLoading: boolean
     setGlobalLoading: (loading: boolean) => void
     setNotes: (notes: Note[]) => void

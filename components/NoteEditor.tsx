@@ -1,7 +1,7 @@
 "use client";
 import { Editor } from "@monaco-editor/react";
 import React, { useEffect, useReducer, useRef, useState } from "react";
-import { ArrowLeft, Eye, Italic, Plus, Star, X } from "react-feather";
+import { ArrowLeft, Eye, Italic, Plus, Save, Star, X } from "react-feather";
 import {
   ContentState,
   EditorState,
@@ -21,8 +21,13 @@ import {
   initialState,
   noteEditorReducer,
 } from "@util/editorReducer";
+import { useLocalStorageValue } from "@react-hookz/web";
 
-const NoteEditor = () => {
+interface NoteEditorProps {
+  refetch: () => void;
+}
+const NoteEditor = (props: NoteEditorProps) => {
+  const refetch = props.refetch;
   const [
     editingNote,
     setEditingNote,
@@ -40,6 +45,11 @@ const NoteEditor = () => {
     s.isEditing,
     s.setEditing,
   ]);
+  const [localMode] = useStore((s) => [s.localMode]);
+  const { value, set } = useLocalStorageValue<Note[]>("notes", {
+    defaultValue: [],
+    initializeWithValue: true,
+  });
   const editingNoteData = notes[editingNote || 0];
   const setMode = useStore((s) => s.setSelectedMode);
   const setSidebar = useStore((s) => s.setSidebarOpen);
@@ -53,7 +63,6 @@ const NoteEditor = () => {
   function resetEditor() {
     dispatch({ type: EditorActionKind.RESET });
     setEditingNote(null);
-    setSidebar(() => false);
     setIsViewing(false);
     setEditing(false);
   }
@@ -77,14 +86,28 @@ const NoteEditor = () => {
       data: note,
       uid: session?.user.id,
     };
+    if (localMode) {
+      note.id = crypto.randomUUID() as unknown as number;
+    }
     if (isEditing) {
       note.id = editingNoteData.id;
       note.created = editingNoteData.created;
-      console.log("editing -- >", note.id, editingNoteData.id);
-      await supabase.from("Notes").update(data).eq("id", note.id);
+      if (localMode && value) {
+        const idx = value.findIndex((el) => el.id === editingNoteData.id);
+        let newVals = [...value];
+        newVals[idx] = note;
+        set(newVals);
+      } else {
+        await supabase.from("Notes").update(data).eq("id", note.id);
+      }
     } else {
-      await supabase.from("Notes").upsert(data);
+      if (localMode) {
+        set([...(value || []), note]);
+      } else {
+        await supabase.from("Notes").upsert(data);
+      }
     }
+    refetch();
     setMode(1);
     resetEditor();
   }
@@ -122,9 +145,9 @@ const NoteEditor = () => {
   return (
     <div
       style={{
-        height: "100%",
+        height: "100vh",
       }}
-      className="flex-col gap-y-2 flex py-16 md:py-8 h-screen overflow-y-hidden  w-full"
+      className="flex-col gap-y-2 flex py-16 md:py-8 overflow-y-scroll  w-full"
     >
       <div>
         <button
@@ -154,7 +177,7 @@ const NoteEditor = () => {
       </div>
 
       <div>
-        <div>Labels (up to 5) </div>
+        <div>Labels {!isViewing && <span>(up to 5) </span>} </div>
         <div
           className={`flex rounded-md p-2 my-2  gap-x-2 border border-zinc-600 ${clsx(
             {
@@ -163,7 +186,10 @@ const NoteEditor = () => {
           )}`}
         >
           {((isViewing && editingNoteData.labels) || labels).map((el, i) => (
-            <div className="rounded-md border-zinc-500 border whitespace-nowrap flex gap-x-2 items-center justify-center bg-zinc-900 p-2">
+            <div
+              key={i}
+              className="rounded-md border-zinc-500 border whitespace-nowrap flex gap-x-2 items-center justify-center bg-zinc-900 p-2"
+            >
               {el}
               {!isViewing && (
                 <button
@@ -223,7 +249,7 @@ const NoteEditor = () => {
           }}
           theme="vs-dark"
           width={"100%"}
-          height={"85%"}
+          height={"100vh"}
           value={editorState.markdown}
           defaultLanguage="markdown"
         />
@@ -248,8 +274,8 @@ const NoteEditor = () => {
           ref={editor}
           readOnly={preview || isViewing}
           wrapperStyle={{
-            height: "50%",
-            maxHeight: "50%",
+            height: "70%",
+            maxHeight: "80%",
           }}
           editorState={editorState.wysiwyg}
           editorClassName="w-full py-16"
@@ -263,19 +289,23 @@ const NoteEditor = () => {
       )}
       <div className="flex flex-col md:flex-row md:justify-between items-center my-6  py-4">
         <div className="w-full flex gap-x-3 text-xs">
-          <EditorButton
-            onClick={() => {
-              dispatch({
-                type: EditorActionKind.SET_FAVORITE,
-                payload: !favorite,
-              });
-            }}
-            active={favorite}
-            icon={<Star />}
-          >
-            <div>Favorite</div>
-          </EditorButton>
-          {
+          {!isViewing && (
+            <EditorButton
+              onClick={() => {
+                dispatch({
+                  type: EditorActionKind.SET_FAVORITE,
+                  payload: !favorite,
+                });
+              }}
+              active={favorite}
+              icon={<Star />}
+            >
+              <div>Favorite</div>
+            </EditorButton>
+          )}
+          {((isViewing && type === "wysiwyg") ||
+            isEditing ||
+            (!isEditing && !isViewing)) && (
             <EditorButton
               active={type === "wysiwyg"}
               icon={<Italic />}
@@ -288,20 +318,24 @@ const NoteEditor = () => {
             >
               <div>Editor Mode</div>
             </EditorButton>
-          }
-          <EditorButton
-            icon={""}
-            active={type === "markdown"}
-            onClick={() => {
-              dispatch({
-                type: EditorActionKind.SET_TYPE,
-                payload: "markdown",
-              });
-            }}
-          >
-            <div className="italic"> MD </div>
-            <div>Markdown Mode</div>
-          </EditorButton>
+          )}
+          {((isViewing && type === "markdown") ||
+            isEditing ||
+            (!isEditing && !isViewing)) && (
+            <EditorButton
+              icon={""}
+              active={type === "markdown"}
+              onClick={() => {
+                dispatch({
+                  type: EditorActionKind.SET_TYPE,
+                  payload: "markdown",
+                });
+              }}
+            >
+              <div className="italic"> MD </div>
+              <div>Markdown Mode</div>
+            </EditorButton>
+          )}
 
           {!isViewing && (
             <EditorButton
@@ -318,12 +352,15 @@ const NoteEditor = () => {
         {!isViewing && (
           <EditorButton
             onClick={addNote}
-            className="md:w-auto w-full my-2 flex-row"
+            className="md:w-auto w-full my-2 flex flex-row"
             icon={""}
           >
-            <div className="whitespace-nowrap text-center">
-              {" "}
-              {isEditing ? "Save note" : "+ Add note"}{" "}
+            <div className="flex  gap-x-2 whitespace-nowrap text-center">
+              <div>
+                {isEditing && <Save />}
+                {!isEditing && <Plus />}
+              </div>{" "}
+              {isEditing ? "Save note" : "Add note"}{" "}
             </div>
           </EditorButton>
         )}

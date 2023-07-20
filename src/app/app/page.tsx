@@ -9,11 +9,12 @@ import useAuth from "@util/useAuth";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import MenuButton from "@components/MenuButton";
+import { WarningModal } from "@components/Modal";
 
 const Gallery = dynamic(() => import("@components/Gallery"), {
   ssr: false,
 });
-export default function Home() {
+function App() {
   const session = useAuth();
   const setSidebar = useStore((s) => s.setSidebarOpen);
   const sidebarOpen = useStore((s) => s.sidebarOpen);
@@ -52,3 +53,4 @@ export default function Home() {
     </main>
   );
 }
+export default dynamic(() => Promise.resolve(App), { ssr: false });

@@ -31,7 +31,7 @@ const useStore = create<NoteStore>()(
         session: s,
       });
     },
-    supabase: createClient(),
+    supabase: undefined as unknown as NoteStore["supabase"],
     setSupabase(client) {
       set({ supabase: client });
     },
@@ -47,6 +47,10 @@ const useStore = create<NoteStore>()(
     isEditing: false,
     setEditing(s) {
       set({ isEditing: s });
+    },
+    localMode: false,
+    setLocalMode(s) {
+      set({ localMode: s });
     },
   }))
 );
