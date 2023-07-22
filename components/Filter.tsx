@@ -1,12 +1,13 @@
-import React from "react";
 import MenuButton from "./MenuButton";
 import { Filter } from "react-feather";
 import Labels from "./Labels";
+export type SortType = "" | "dd" | "da" | "ta" | "td";
 interface NoteFilterProps {
   onChange: (selectedLabels: string[]) => void;
   labels: string[];
+  onSelectChange: (sortType: SortType) => void;
 }
-const NoteFilter = ({ labels, onChange }: NoteFilterProps) => {
+const NoteFilter = ({ labels, onChange, onSelectChange }: NoteFilterProps) => {
   return (
     <div className="flex flex-col gap-y-3">
       <div>
@@ -24,22 +25,18 @@ const NoteFilter = ({ labels, onChange }: NoteFilterProps) => {
         </div>
       </div>
       <div className="flex flex-col gap-y-2">
-        <label htmlFor="sort">Sort by: </label>
         <select
           onChange={(e) => {
-            console.log(e.target.value);
+            onSelectChange(e.target.value as SortType);
           }}
-          name="data-sort"
           id="sort"
           className="bg-transparent p-4 rounded-md outline outline-2 outline-zinc-800 w-min active:outline-indigo-500 focus:outline-indigo-500"
         >
-          <option className="" value="DA">
-            {" "}
-            Date: Ascending{" "}
-          </option>
-          <option value="DD">Date: Descending</option>
-          <option value="TA">Title: Ascending</option>
-          <option value="TD">Title: Descending</option>
+          <option value="">--Choose an option--</option>
+          <option value="da">Date: Ascending</option>
+          <option value="dd">Date: Descending</option>
+          <option value="ta">Title: Ascending</option>
+          <option value="td">Title: Descending</option>
         </select>
       </div>
     </div>

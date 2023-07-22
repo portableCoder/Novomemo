@@ -19,6 +19,9 @@ const Reset = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const router = useRouter();
+  const params = useParams();
+  const [init, setInit] = useState(false);
+
   const onSubmit = async (e: any) => {
     e.preventDefault();
     setError(null);
@@ -48,7 +51,7 @@ const Reset = () => {
         setSuccess("Successfully reeset password, redirecting to login...");
         setTimeout(() => {
           router.push("/login");
-        }, 1500);
+        }, 2000);
       }
     });
   };
@@ -69,7 +72,7 @@ const Reset = () => {
         </div>
         <form
           onSubmit={onSubmit}
-          className="flex flex-col items-center justify-center w-full"
+          className="flex flex-col items-center justify-center w-full gap-y-3"
         >
           <Input
             type="password"
@@ -98,21 +101,18 @@ const Reset = () => {
             }
           />
 
-          <input
-            className="btn w-full"
-            type="submit"
-            value={"Reset password"}
-          />
+          <button className="btn w-full" type="submit">
+            Reset password
+          </button>
           {error && <div className="text-xl">{error}</div>}
         </form>
-        {(error && error !== "Passwords must be equal") ||
-          (success && (
-            <div
-              className={`w-full border ${success_style} ${error_style}  rounded-md p-4 flex items-center justify-center text-xl`}
-            >
-              {error || success}
-            </div>
-          ))}
+        {((error && error !== "Passwords must be equal") || success) && (
+          <div
+            className={`w-full border ${success_style} ${error_style}  rounded-md p-4 flex items-center justify-center text-xl`}
+          >
+            {error || success}
+          </div>
+        )}
       </div>
     </div>
   );

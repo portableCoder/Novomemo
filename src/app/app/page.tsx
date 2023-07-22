@@ -19,14 +19,8 @@ function App() {
   const setSidebar = useStore((s) => s.setSidebarOpen);
   const sidebarOpen = useStore((s) => s.sidebarOpen);
   const sidebarSpring = useSpring({
-    x: sidebarOpen ? 0 : -64,
+    x: sidebarOpen ? 0 : -256,
   });
-  const transitions = useTransition(sidebarOpen, {
-    from: { opacity: 0 },
-    enter: { opacity: 1 },
-    leave: { opacity: 1 },
-  });
-
   return (
     <main className="text-white w-full  pb-2 flex gap-x-2">
       <div className=" h-full  w-16  top-0 left-0 z-50">
@@ -38,14 +32,9 @@ function App() {
             ></MenuButton>
           )}
         </div>
-        {transitions(
-          (spring, item, _, key) =>
-            item && (
-              <animated.div key={key} style={spring}>
-                <Sidebar />
-              </animated.div>
-            )
-        )}
+        <animated.div style={sidebarSpring}>
+          <Sidebar />
+        </animated.div>
       </div>
       <div className="w-full flex">
         <Gallery />

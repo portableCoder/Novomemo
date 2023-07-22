@@ -1,17 +1,13 @@
 "use client";
-import { Input } from "@components/Input";
 import React from "react";
-import { useState, useEffect } from "react";
-
-import { Session, createClient } from "@supabase/supabase-js";
+import { useEffect } from "react";
 import { Auth } from "@supabase/auth-ui-react";
-import { ThemeSupa } from "@supabase/auth-ui-shared";
 import useAuth from "@util/useAuth";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import useStore from "@store/index";
-import Modal, { LoadingModal } from "@components/Modal";
-import Spinner from "@components/Spinner";
+import { LoadingModal } from "@components/Modal";
+import Logo from "@components/Logo";
 const Login = () => {
   const session = useAuth();
   const [supabase, loading] = useStore((s) => [s.supabase, s.globalLoading]);
@@ -26,7 +22,12 @@ const Login = () => {
       {loading && <LoadingModal />}
 
       <div className=" rounded-md my-auto flex flex-col gap-y-2 items-center">
-        <div className="text-4xl">Novomemo</div>
+        <div className="flex gap-x-2 text-4xl">
+          <div>
+            <Logo />
+          </div>
+          Novomemo
+        </div>
         {supabase && (
           <Auth
             providers={[]}

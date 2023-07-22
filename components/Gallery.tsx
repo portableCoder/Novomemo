@@ -1,22 +1,18 @@
-"use client";
 import dynamic from "next/dynamic";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Input } from "./Input";
 import useStore from "@store/index";
-import { ArrowLeft, Menu, RefreshCw, Star } from "react-feather";
+import { RefreshCw } from "react-feather";
 import { animated, useSpring } from "react-spring";
-import { useLocalStorage } from "react-use";
 import NoteCard from "./NoteCard";
-import { useDebouncedEffect, useLocalStorageValue } from "@react-hookz/web";
+import { useDebouncedEffect } from "@react-hookz/web";
 import Fuse from "fuse.js";
-import Spinner from "./Spinner";
 import MenuButton from "./MenuButton";
 import Skeleton from "./Skeleton";
 import useLocalNotes from "@util/useLocalNotes";
-import { WarningModal } from "./Modal";
 import { Menu as MenuEnum } from "@util/Menu";
-import NoteFilter from "./Filter";
+import NoteFilter, { SortType } from "./Filter";
 const NoteEditor = dynamic(() => import("@components/NoteEditor"), {
   ssr: false,
 });
@@ -110,6 +106,39 @@ const Gallery = () => {
     () => new Set(searched.filter(filterFn).flatMap((el) => el.labels)),
     [searched]
   );
+  const [sort, setSort] = useState<SortType>("");
+
+  const sortFn = useCallback(
+    (n1: Note, n2: Note) => {
+      switch (sort) {
+        case "da":
+          if (n1.created > n2.created) {
+            return -1;
+          }
+          if (n2.created > n1.created) {
+            return 1;
+          } else {
+            return 0;
+          }
+        case "dd":
+          if (n1.created < n2.created) {
+            return -1;
+          }
+          if (n2.created < n1.created) {
+            return 1;
+          } else {
+            return 0;
+          }
+        case "ta":
+          return n1.title.localeCompare(n2.title);
+        case "td":
+          return n2.title.localeCompare(n1.title);
+        default:
+          return 0;
+      }
+    },
+    [searched, sort]
+  );
   const labelFn = (el: Note) => {
     if (selectedLabels.length === 0) {
       return true;
@@ -126,7 +155,7 @@ const Gallery = () => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
-  const [parent, enableAnimations] = useAutoAnimate();
+  const [parent, _] = useAutoAnimate();
 
   return (
     <div className="w-full h-full flex flex-col  gap-y-10 px-4 py-2">
@@ -135,10 +164,13 @@ const Gallery = () => {
           onChange={(e) => setSearch(e.currentTarget.value)}
           placeholder="Search..."
         />
-        <NoteFilter
-          labels={Array.from(labels)}
-          onChange={(e) => setSelectedLabels(e)}
-        />
+        {notes.length > 0 && (
+          <NoteFilter
+            onSelectChange={(e) => setSort(e)}
+            labels={Array.from(labels)}
+            onChange={(e) => setSelectedLabels(e)}
+          />
+        )}
       </div>
 
       <div
@@ -151,20 +183,17 @@ const Gallery = () => {
           searched
             .filter(filterFn)
             .filter(labelFn)
+            .sort(sortFn)
             .map((el) => <NoteCard key={el.id} note={el} />)}
       </div>
-      {error && (
-        <div className="flex col-span-1 md:col-span-3 items-center justify-center gap-x-2 text-red-500">
-          {error}
-          <MenuButton
-            onClick={() => setRefetch((prev) => !prev)}
-            icon={<RefreshCw />}
-          >
-            {" "}
-            Retry{" "}
-          </MenuButton>
-        </div>
-      )}
+      {
+        <button
+          className="flex gap-x-2 text-red-400 items-center justify-center"
+          onClick={() => setRefetch((prev) => !prev)}
+        >
+          An error occured: {error} Retry {<RefreshCw />}
+        </button>
+      }
       <animated.div
         style={spring}
         className="w-full h-full fixed flex flex-col gap-y-3 top-0 left-0 z-50 px-4 bg-zinc-900"

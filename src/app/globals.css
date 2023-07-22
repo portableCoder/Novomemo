@@ -28,11 +28,11 @@
   }
 }
 .btn {
-  @apply w-full rounded-md p-4 flex items-center justify-center bg-indigo-500 hover:bg-indigo-400;
+  @apply w-full rounded-md p-4 flex items-center justify-center bg-indigo-600 hover:bg-indigo-500;
 }
 body,
 html {
-  @apply bg-zinc-950;
+  @apply bg-zinc-900;
   overflow-x: hidden;
 }
 select > option {

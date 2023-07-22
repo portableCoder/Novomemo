@@ -131,7 +131,7 @@ const NoteEditor = (props: NoteEditorProps) => {
           markdown: mdcontent,
           wysiwyg: editorContent,
         },
-        favorite: false,
+        favorite: editingNoteData.favorite,
         focused: false,
         labels: editingNoteData.labels,
         title: editingNoteData.title,

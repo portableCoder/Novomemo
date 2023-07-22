@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "deploy": "yarn build && next export && touch ./out/.nojekyll && gh-pages -d out -t true"
   },
   "dependencies": {
     "@formkit/auto-animate": "^0.7.0",

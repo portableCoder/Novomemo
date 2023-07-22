@@ -1,22 +1,8 @@
 "use client";
-import {
-  Archive,
-  ArrowLeft,
-  Book,
-  ChevronDown,
-  Edit,
-  Icon,
-  Key,
-  Plus,
-  Star,
-  Tag,
-  X,
-} from "react-feather";
-import React, { useRef, useState } from "react";
+import { Archive, ArrowLeft, Edit, Icon, Key, Plus, Star } from "react-feather";
+import React, { useState } from "react";
 import MenuButton from "./MenuButton";
-import Labels from "./Labels";
 import useStore from "@store/index";
-import { useSpring } from "react-spring";
 
 const menus = [
   [Plus, "Add note"],
@@ -26,8 +12,6 @@ const menus = [
 ] as [Icon, string][];
 
 const Sidebar = () => {
-  const [labelOpen, setLabelOpen] = useState(false);
-
   const { selectedMode, setSelectedMode } = useStore(
     ({ selectedMode, setSelectedMode }) => ({ selectedMode, setSelectedMode })
   );

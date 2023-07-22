@@ -1,19 +1,9 @@
 import useStore from "@store/index";
 import dayjs from "@util/dayjs";
 import React from "react";
-import {
-  Archive,
-  Edit,
-  Eye,
-  Icon,
-  Italic,
-  Star,
-  Trash,
-  Type,
-} from "react-feather";
+import { Archive, Edit, Eye, Icon, Star, Trash, Type } from "react-feather";
 import Labels from "./Labels";
 import { Menu } from "@util/Menu";
-import { useLocalStorageValue } from "@react-hookz/web";
 import useLocalNotes from "@util/useLocalNotes";
 interface NoteCardProps {
   note: Note;
@@ -114,12 +104,12 @@ const NoteCard = ({ note }: NoteCardProps) => {
         >
           <Trash />
         </button>
-        {!note.archived && (
+        {
           <button
             onClick={async () => {
               let newNote = { ...note };
               const newNotes = [...notes];
-              newNote.archived = true;
+              newNote.archived = !newNote.archived;
               const idx = newNotes.findIndex((el) => el.id === newNote.id);
               newNotes[idx] = newNote;
               if (localMode) {
@@ -136,7 +126,7 @@ const NoteCard = ({ note }: NoteCardProps) => {
           >
             <Archive />
           </button>
-        )}
+        }
       </div>
     </div>
   );

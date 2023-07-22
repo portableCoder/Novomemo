@@ -1,7 +1,6 @@
 import { Button } from "@app_types/Button";
 import clsx from "clsx";
 import React from "react";
-import { Icon } from "react-feather";
 
 const MenuButton = ({ icon, children, onClick, active }: Button) => {
   const sel = clsx({
