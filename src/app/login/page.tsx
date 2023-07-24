@@ -22,7 +22,7 @@ const Login = () => {
       {loading && <LoadingModal />}
 
       <div className=" rounded-md my-auto flex flex-col gap-y-2 items-center">
-        <div className="flex gap-x-2 text-4xl">
+        <div className="flex items-center justify-center gap-x-2 text-4xl">
           <div>
             <Logo />
           </div>

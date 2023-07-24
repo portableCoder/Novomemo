@@ -20,28 +20,28 @@ export default function RootLayout({
       <meta property="og:title" content="Novomemo" />
       <meta
         property="og:image"
-        content="https://raw.githubusercontent.com/portableCoder/Lofi-Doro/master/assets/logo.png"
+        content="https://raw.githubusercontent.com/portableCoder/Novomemo/master/assets/Banner.png"
       />
       <meta property="og:description" content="A simple note-taking app" />
       <meta name="description" content="A simple note-taking app" />
 
-      <link rel="shortcut icon" href="/favicon.ico" />
+      <link rel="shortcut icon" href="/Novomemo/favicon.ico" />
       <link
         rel="apple-touch-icon"
         sizes="180x180"
-        href="/apple-touch-icon.png"
+        href="/Novomemo/apple-touch-icon.png"
       />
       <link
         rel="icon"
         type="image/png"
         sizes="32x32"
-        href="/favicon-32x32.png"
+        href="/Novomemo/favicon-32x32.png"
       />
       <link
         rel="icon"
         type="image/png"
         sizes="16x16"
-        href="/favicon-16x16.png"
+        href="/Novomemo/favicon-16x16.png"
       />
       <body className={poppins.className}>{children}</body>
     </html>

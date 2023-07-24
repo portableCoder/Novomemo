@@ -19,7 +19,6 @@ const NoteEditor = dynamic(() => import("@components/NoteEditor"), {
 
 const Gallery = () => {
   const mode = useStore((prev) => prev.selectedMode);
-  const setMode = useStore((prev) => prev.setSelectedMode);
   useEffect(() => {
     if (mode == 0) {
       document.body.classList.add("overflow-hidden");
@@ -102,10 +101,7 @@ const Gallery = () => {
     },
     [mode]
   );
-  const currentLabels = useMemo(
-    () => new Set(searched.filter(filterFn).flatMap((el) => el.labels)),
-    [searched]
-  );
+
   const [sort, setSort] = useState<SortType>("");
 
   const sortFn = useCallback(
@@ -186,14 +182,14 @@ const Gallery = () => {
             .sort(sortFn)
             .map((el) => <NoteCard key={el.id} note={el} />)}
       </div>
-      {
+      {error && (
         <button
           className="flex gap-x-2 text-red-400 items-center justify-center"
           onClick={() => setRefetch((prev) => !prev)}
         >
           An error occured: {error} Retry {<RefreshCw />}
         </button>
-      }
+      )}
       <animated.div
         style={spring}
         className="w-full h-full fixed flex flex-col gap-y-3 top-0 left-0 z-50 px-4 bg-zinc-900"

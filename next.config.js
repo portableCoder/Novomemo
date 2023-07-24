@@ -4,7 +4,7 @@ const nextConfig = {
     swcMinify: true,
     output: 'export',
     basePath: '/Novomemo',
-    assetPrefix: '/Novomemo',
+    assetPrefix: '/Novomemo/',
     distDir: 'dist'
 }
 
