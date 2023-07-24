@@ -24,6 +24,7 @@ const NoteFilter = ({ labels, onChange, onSelectChange }: NoteFilterProps) => {
           </div>
         </div>
       </div>
+      <div>Sort by:</div>
       <div className="flex flex-col gap-y-2">
         <select
           onChange={(e) => {
@@ -33,8 +34,8 @@ const NoteFilter = ({ labels, onChange, onSelectChange }: NoteFilterProps) => {
           className="bg-transparent p-4 rounded-md outline outline-2 outline-zinc-800 w-min active:outline-indigo-500 focus:outline-indigo-500"
         >
           <option value="">--Choose an option--</option>
-          <option value="da">Date: Ascending</option>
-          <option value="dd">Date: Descending</option>
+          <option value="da">Date: Newest</option>
+          <option value="dd">Date: Oldest</option>
           <option value="ta">Title: Ascending</option>
           <option value="td">Title: Descending</option>
         </select>

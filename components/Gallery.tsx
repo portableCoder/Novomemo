@@ -55,7 +55,7 @@ const Gallery = () => {
           .select(`id,data`)
           .eq("uid", user.id);
         if (data) {
-          setNotes(data?.map((el) => ({ ...el.data, id: el.id })) as Note[]);
+          setNotes(data.map((n) => ({ ...n.data, id: n.id })) as Note[]);
         }
         if (error) {
           setError("Error fetching data..");

@@ -118,8 +118,8 @@ const NoteCard = ({ note }: NoteCardProps) => {
               } else {
                 await supabase
                   .from("Notes")
-                  .update({ content: newNote })
-                  .eq("id", note.id);
+                  .update({ data: newNote })
+                  .match({ id: newNote.id });
                 setNotes(newNotes);
               }
             }}
