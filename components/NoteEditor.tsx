@@ -293,11 +293,12 @@ const NoteEditor = (props: NoteEditorProps) => {
                     return !inline && match ? (
                       <SyntaxHighlighter
                         {...props}
-                        children={String(children).replace(/\n$/, "")}
                         style={atomDark}
                         language={match[1]}
                         PreTag="div"
-                      />
+                      >
+                        {String(children).replace(/\n$/, "")}
+                      </SyntaxHighlighter>
                     ) : (
                       <code {...props} className={className}>
                         {children}
