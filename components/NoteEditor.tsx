@@ -1,33 +1,16 @@
 "use client";
-import { FullScreen, useFullScreenHandle } from "react-full-screen";
+import { v4 } from "uuid";
+
 import { Editor } from "@monaco-editor/react";
-import React, { useEffect, useReducer, useRef, useState } from "react";
-import {
-  ArrowLeft,
-  Eye,
-  Italic,
-  Maximize2,
-  Plus,
-  Save,
-  Star,
-  X,
-} from "react-feather";
-import rehypeHighlight from "rehype-highlight";
+import React, { useEffect, useReducer, useState } from "react";
+import { Edit, Eye, Plus, Save, Star, X } from "react-feather";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import {
-  ContentState,
-  EditorState,
-  convertFromRaw,
-  convertToRaw,
-} from "draft-js";
-import { Editor as WYSIWYGEditor } from "react-draft-wysiwyg";
 import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 import remarkGfm from "remark-gfm";
 import EditorButton from "./EditorButton";
 import useStore from "@store/index";
 import { Input } from "./Input";
-import clsx from "clsx";
 import {
   EditorActionKind,
   NoteEditorState,
@@ -43,7 +26,6 @@ interface NoteEditorProps {
 
 const NoteEditor = (props: NoteEditorProps) => {
   const refetch = props.refetch;
-  const handle = useFullScreenHandle();
 
   const [
     editingNote,
@@ -70,12 +52,11 @@ const NoteEditor = (props: NoteEditorProps) => {
   const isMobile = useIsMobile();
   const editingNoteData = notes[editingNote || 0];
   const setMode = useStore((s) => s.setSelectedMode);
-  const setSidebar = useStore((s) => s.setSidebarOpen);
   const supabase = useStore((s) => s.supabase);
   const session = useStore((s) => s.session);
   const [preview, setPreview] = useState(false);
   const [
-    { title, editorState, favorite, type, labels, labelValue, focused },
+    { title, favorite, labels, labelValue, focused, data: notedata },
     dispatch,
   ] = useReducer(noteEditorReducer, initialState);
   function resetEditor() {
@@ -87,13 +68,7 @@ const NoteEditor = (props: NoteEditorProps) => {
   async function addNote() {
     let note: Note = {
       archived: false,
-      content:
-        type == "wysiwyg"
-          ? JSON.stringify(
-              convertToRaw(editorState.wysiwyg.getCurrentContent())
-            )
-          : editorState[type],
-      editor: type,
+      content: notedata,
       created: new Date().getTime(),
       favorite,
       labels,
@@ -105,9 +80,9 @@ const NoteEditor = (props: NoteEditorProps) => {
       uid: session?.user.id,
     };
     if (localMode) {
-      note.id = crypto.randomUUID() as unknown as number;
+      note.id = v4() as unknown as number;
     }
-    if (isEditing) {
+    if (isEditing && editingNoteData) {
       note.id = editingNoteData.id;
       note.created = editingNoteData.created;
       note.archived = editingNoteData.archived;
@@ -131,50 +106,35 @@ const NoteEditor = (props: NoteEditorProps) => {
     resetEditor();
   }
 
-  const editor = useRef<WYSIWYGEditor>(null);
   useEffect(() => {
     if (isViewing || isEditing) {
-      let editorContent = editingNoteData.content;
-      let mdcontent = "";
-      if (editingNoteData.editor === "wysiwyg") {
-        editorContent = EditorState.createWithContent(
-          convertFromRaw(JSON.parse(editingNoteData.content))
-        );
-      } else {
-        editorContent = EditorState.createEmpty();
-        mdcontent = editingNoteData.content;
-      }
+      if (editingNoteData) {
+        const savedState: NoteEditorState = {
+          data: editingNoteData.content,
+          favorite: editingNoteData.favorite,
+          focused: false,
+          labels: editingNoteData.labels,
+          title: editingNoteData.title,
+          labelValue,
+        };
 
-      const savedState: NoteEditorState = {
-        editorState: {
-          markdown: mdcontent,
-          wysiwyg: editorContent,
-        },
-        favorite: editingNoteData.favorite,
-        focused: false,
-        labels: editingNoteData.labels,
-        title: editingNoteData.title,
-        type: editingNoteData.editor,
-        labelValue,
-      };
-      dispatch({ type: EditorActionKind.SET_STATE, payload: savedState });
+        dispatch({ type: EditorActionKind.SET_STATE, payload: savedState });
+      } else {
+        const savedState: NoteEditorState = {
+          data: notedata,
+          favorite,
+          focused: false,
+          labels,
+          title,
+          labelValue,
+        };
+
+        dispatch({ type: EditorActionKind.SET_STATE, payload: savedState });
+      }
     }
   }, [isViewing, isEditing]);
-  const editorHeight = isMobile ? "20vh" : "35vh";
   return (
-    <div className="flex-col h-screen gap-y-2 overflow-hidden flex py-16 md:py-8  w-full">
-      <div>
-        <button
-          onClick={() => {
-            setMode(1);
-            resetEditor();
-          }}
-          className="flex items-center justify-center gap-x-2"
-        >
-          <ArrowLeft />
-          <div>Back</div>
-        </button>
-      </div>
+    <div className="flex-col min-h-screen gap-y-2 overflow-hidden flex py-16 md:py-8 px-2  w-full">
       <div>
         <div>Title</div>
         <Input
@@ -192,13 +152,7 @@ const NoteEditor = (props: NoteEditorProps) => {
 
       <div>
         <div>Labels {!isViewing && <span>(up to 5) </span>} </div>
-        <div
-          className={`flex rounded-md p-2 my-2  gap-x-2 border border-zinc-600 ${clsx(
-            {
-              "border-indigo-500": focused,
-            }
-          )}`}
-        >
+        <div className="flex gap-x-2 flex-wrap">
           {((isViewing && editingNoteData.labels) || labels).map((el, i) => (
             <div
               key={i}
@@ -219,199 +173,166 @@ const NoteEditor = (props: NoteEditorProps) => {
               )}
             </div>
           ))}
-          {!isViewing && labels.length < 5 && (
-            <Input
-              disabled={isViewing}
-              onFocus={(e) => {
-                dispatch({ type: EditorActionKind.SET_FOCUSED, payload: true });
-              }}
-              onBlur={() => {
-                dispatch({
-                  type: EditorActionKind.SET_FOCUSED,
-                  payload: false,
-                });
-              }}
-              value={labelValue}
-              placeholder="Enter labels"
-              onChange={(e) =>
+        </div>
+        {!isViewing && labels.length < 5 && (
+          <Input
+            disabled={isViewing}
+            onFocus={(e) => {
+              dispatch({ type: EditorActionKind.SET_FOCUSED, payload: true });
+            }}
+            onBlur={() => {
+              dispatch({
+                type: EditorActionKind.SET_FOCUSED,
+                payload: false,
+              });
+            }}
+            value={labelValue}
+            placeholder="Enter labels"
+            onChange={(e) =>
+              dispatch({
+                type: EditorActionKind.SET_LABEL_VALUE,
+                payload: e.currentTarget.value,
+              })
+            }
+            onKeyDown={(e) => {
+              const labelStripped = labelValue.trim();
+
+              if (e.key === "Enter" && labelStripped.length > 0) {
                 dispatch({
                   type: EditorActionKind.SET_LABEL_VALUE,
-                  payload: e.currentTarget.value,
-                })
+                  payload: "",
+                });
+                dispatch({
+                  type: EditorActionKind.SET_LABELS,
+                  payload: Array.from(new Set([...labels, labelValue])),
+                });
               }
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && labelValue.length > 0) {
-                  dispatch({
-                    type: EditorActionKind.SET_LABEL_VALUE,
-                    payload: "",
-                  });
-                  dispatch({
-                    type: EditorActionKind.SET_LABELS,
-                    payload: Array.from(new Set([...labels, labelValue])),
-                  });
-                }
-              }}
-              className="border-none outline-0 outline-none px-2"
-            />
-          )}
-        </div>
+            }}
+            className="border-none outline-0 outline-none px-2"
+          />
+        )}
       </div>
-      <FullScreen handle={handle}>
-        <div className="h-full flex flex-col">
-          <div className="flex w-full items-end justify-end p-4 ">
-            <button
-              className="p-2 z-50"
-              onClick={handle.active ? handle.exit : handle.enter}
+      <div className="h-full  flex flex-col">
+        {!preview && !isViewing && (
+          <Editor
+            onChange={(e) => {
+              dispatch({ type: EditorActionKind.SET_MD, payload: e });
+            }}
+            className="outline outline-1 outline-zinc-700 rounded-md focus:outline-indigo-600 "
+            theme="vs-dark"
+            width={"100%"}
+            height={isMobile ? "40vh" : "50vh"}
+            value={notedata}
+            defaultLanguage="markdown"
+          />
+        )}
+        {(isViewing || preview) && (
+          <div
+            id="check-test"
+            className="w-full h-full overflow-y-scroll test-class"
+          >
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                code({ node, inline, className, children, ...props }) {
+                  const match = /language-(\w+)/.exec(className || "");
+                  return !inline && match ? (
+                    <SyntaxHighlighter
+                      {...props}
+                      style={atomDark}
+                      language={match[1]}
+                      PreTag="div"
+                    >
+                      {String(children).replace(/\n$/, "")}
+                    </SyntaxHighlighter>
+                  ) : (
+                    <code {...props} className={className}>
+                      {children}
+                    </code>
+                  );
+                },
+              }}
             >
-              <Maximize2 />
-            </button>
+              {notedata}
+            </ReactMarkdown>
           </div>
-          {type === "markdown" && !preview && !isViewing && (
-            <Editor
-              onChange={(e) => {
-                dispatch({ type: EditorActionKind.SET_MD, payload: e });
+        )}
+      </div>
+      <div className="flex flex-col md:flex-row md:justify-between items-center md:text-base text-xs px-2 md:px-4">
+        <div className="w-full flex gap-x-3 ">
+          {
+            <EditorButton
+              onClick={() => {
+                setEditing(true);
+                setIsViewing(false);
+                setPreview(false);
               }}
-              theme="vs-dark"
-              width={"100%"}
-              height={handle.active ? "100vh" : editorHeight}
-              value={editorState.markdown}
-              defaultLanguage="markdown"
-            />
-          )}
-          {type === "markdown" && (isViewing || preview) && (
-            <div
-              style={{
-                height: isMobile ? "100vh" : editorHeight,
-              }}
-              className="w-full overflow-y-scroll test-class"
+              buttonActive={isEditing}
+              icon={<Edit />}
             >
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                components={{
-                  code({ node, inline, className, children, ...props }) {
-                    const match = /language-(\w+)/.exec(className || "");
-                    return !inline && match ? (
-                      <SyntaxHighlighter
-                        {...props}
-                        style={atomDark}
-                        language={match[1]}
-                        PreTag="div"
-                      >
-                        {String(children).replace(/\n$/, "")}
-                      </SyntaxHighlighter>
-                    ) : (
-                      <code {...props} className={className}>
-                        {children}
-                      </code>
-                    );
-                  },
-                }}
-              >
-                {(isViewing &&
-                  editingNoteData.editor === "markdown" &&
-                  editingNoteData.content) ||
-                  editorState.markdown}
-              </ReactMarkdown>
-            </div>
-          )}
-          {type === "wysiwyg" && (
-            <WYSIWYGEditor
-              ref={editor}
-              readOnly={preview || isViewing}
-              wrapperStyle={{
-                height: handle.active ? "80vh" : editorHeight,
-                maxHeight: handle.active ? "80vh" : editorHeight,
-              }}
-              editorState={editorState.wysiwyg}
-              editorClassName="w-full py-16"
-              toolbarClassName={`text-black ${
-                (preview || isViewing) && "opacity-0"
-              }`}
-              onEditorStateChange={(e) =>
-                dispatch({ type: EditorActionKind.SET_WYSIWYG, payload: e })
-              }
-            />
-          )}
-        </div>
-        <div className="flex flex-col md:flex-row md:justify-between items-center md:text-base text-xs  px-4">
-          <div className="w-full flex gap-x-3 ">
-            {!isViewing && (
-              <EditorButton
-                onClick={() => {
-                  dispatch({
-                    type: EditorActionKind.SET_FAVORITE,
-                    payload: !favorite,
-                  });
-                }}
-                active={favorite}
-                icon={<Star />}
-              >
-                <div>Favorite</div>
-              </EditorButton>
-            )}
-            {((isViewing && type === "wysiwyg") ||
-              isEditing ||
-              (!isEditing && !isViewing)) && (
-              <EditorButton
-                active={type === "wysiwyg"}
-                icon={<Italic />}
-                onClick={() => {
-                  dispatch({
-                    type: EditorActionKind.SET_TYPE,
-                    payload: "wysiwyg",
-                  });
-                }}
-              >
-                <div>Editor Mode</div>
-              </EditorButton>
-            )}
-            {((isViewing && type === "markdown") ||
-              isEditing ||
-              (!isEditing && !isViewing)) && (
-              <EditorButton
-                icon={""}
-                active={type === "markdown"}
-                onClick={() => {
-                  dispatch({
-                    type: EditorActionKind.SET_TYPE,
-                    payload: "markdown",
-                  });
-                }}
-              >
-                <div className="italic"> MD </div>
-                <div>Markdown Mode</div>
-              </EditorButton>
-            )}
-
-            {!isViewing && (
-              <EditorButton
-                icon={<Eye />}
-                active={preview}
-                onClick={() => {
-                  setPreview((prev) => !prev);
-                }}
-              >
-                <div className="whitespace-nowrap text-center"> Preview </div>
-              </EditorButton>
-            )}
-          </div>
+              <div>Edit</div>
+            </EditorButton>
+          }
           {!isViewing && (
             <EditorButton
-              onClick={addNote}
-              className="md:w-auto w-full my-2 flex flex-row"
-              icon={""}
+              onClick={() => {
+                dispatch({
+                  type: EditorActionKind.SET_FAVORITE,
+                  payload: !favorite,
+                });
+              }}
+              buttonActive={favorite}
+              icon={<Star />}
             >
-              <div className="flex  gap-x-2 whitespace-nowrap text-center">
-                <div>
-                  {isEditing && <Save />}
-                  {!isEditing && <Plus />}
-                </div>{" "}
-                {isEditing ? "Save note" : "Add note"}{" "}
-              </div>
+              <div>Favorite</div>
+            </EditorButton>
+          )}
+
+          {!isViewing && (
+            <EditorButton
+              icon={<Eye />}
+              buttonActive={preview}
+              onClick={() => {
+                setPreview((prev) => !prev);
+              }}
+            >
+              <div className="whitespace-nowrap text-center"> Preview </div>
             </EditorButton>
           )}
         </div>
-      </FullScreen>
+        {
+          <EditorButton
+            icon={""}
+            className="md:w-auto w-full my-2 outline outline-1 outline-zinc-800 flex flex-row"
+            onClick={() => {
+              setMode(1);
+              resetEditor();
+            }}
+          >
+            <div className="flex  gap-x-2 items-center whitespace-nowrap text-center">
+              <div>
+                <X />
+              </div>{" "}
+              Close
+            </div>
+          </EditorButton>
+        }
+        {!isViewing && (
+          <EditorButton
+            onClick={addNote}
+            className="md:w-auto w-full my-2 flex flex-row outline outline-1 outline-zinc-800 items-center"
+            icon={""}
+          >
+            <div className="flex  gap-x-2 items-center whitespace-nowrap text-center">
+              <div>
+                {isEditing && <Save />}
+                {!isEditing && <Plus />}
+              </div>{" "}
+              {isEditing ? "Save note" : "Add note"}{" "}
+            </div>
+          </EditorButton>
+        )}
+      </div>
     </div>
   );
 };

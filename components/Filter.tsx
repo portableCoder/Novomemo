@@ -1,4 +1,3 @@
-import MenuButton from "./MenuButton";
 import { Filter } from "react-feather";
 import Labels from "./Labels";
 export type SortType = "" | "dd" | "da" | "ta" | "td";
@@ -9,7 +8,7 @@ interface NoteFilterProps {
 }
 const NoteFilter = ({ labels, onChange, onSelectChange }: NoteFilterProps) => {
   return (
-    <div className="flex flex-col gap-y-3">
+    <div className="flex flex-col gap-y-3 my-2">
       <div>
         <div className="flex gap-x-3">
           <Filter />
@@ -33,7 +32,7 @@ const NoteFilter = ({ labels, onChange, onSelectChange }: NoteFilterProps) => {
           id="sort"
           className="bg-transparent p-4 rounded-md outline outline-2 outline-zinc-800 w-min active:outline-indigo-500 focus:outline-indigo-500"
         >
-          <option value="">--Choose an option--</option>
+          <option value="">Choose an option</option>
           <option value="da">Date: Newest</option>
           <option value="dd">Date: Oldest</option>
           <option value="ta">Title: Ascending</option>

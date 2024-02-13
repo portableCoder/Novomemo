@@ -29,7 +29,7 @@ const Labels = ({ items, selectedItems, fixed }: Labels) => {
               setSel(s);
             }
           }}
-          className={`py-2 px-8 rounded-3xl text-white  ${
+          className={`py-2 px-8 rounded-md text-white  ${
             sel[i] ? "border-4  border-indigo-500" : " border-4 border-zinc-600"
           } `}
         >

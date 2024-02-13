@@ -1,19 +1,14 @@
 import { EditorState } from "draft-js";
 
 enum EditorActionKind {
-    SET_WYSIWYG = 'SET_WYSIWYG',
     SET_MD = 'SET_MD',
     SET_LABELS = 'SET_LABELS',
     SET_FAVORITE = 'SET_FAVORITE',
     SET_TITLE = 'SET_TITLE',
-    SET_TYPE = 'SET_TYPE',
     SET_LABEL_VALUE = 'SET_LABEL_VALUE',
     SET_FOCUSED = 'SET_FOCUSED',
     RESET = "RESET",
-
     SET_STATE = "SET_STATE",
-
-
 
 }
 
@@ -25,24 +20,17 @@ interface EditorAction {
 
 // An interface for our state
 interface NoteEditorState {
-    editorState: {
-        markdown: string,
-        wysiwyg: EditorState
-    },
+
     focused: boolean,
     labelValue: string,
     title: string,
-    type: Note['editor'],
+    data: string
     favorite: boolean
     labels: string[]
 }
 const initialState: NoteEditorState = {
     title: "",
-    editorState: {
-        markdown: "",
-        wysiwyg: EditorState.createEmpty()
-    },
-    type: "wysiwyg",
+    data: "",
     favorite: false,
     labels: [],
     labelValue: "",
@@ -54,10 +42,8 @@ const initialState: NoteEditorState = {
 function noteEditorReducer(state: NoteEditorState, action: EditorAction): NoteEditorState {
     const { type, payload } = action;
     switch (type) {
-        case EditorActionKind.SET_WYSIWYG:
-            return { ...state, editorState: { markdown: state.editorState.markdown, wysiwyg: payload } }
         case EditorActionKind.SET_MD:
-            return { ...state, editorState: { markdown: payload, wysiwyg: state.editorState.wysiwyg } }
+            return { ...state, data: payload }
         case EditorActionKind.SET_TITLE:
 
             return { ...state, title: payload }
@@ -71,8 +57,6 @@ function noteEditorReducer(state: NoteEditorState, action: EditorAction): NoteEd
 
         case EditorActionKind.SET_LABEL_VALUE:
             return { ...state, labelValue: payload }
-        case EditorActionKind.SET_TYPE:
-            return { ...state, type: payload }
         case EditorActionKind.RESET:
             return initialState
         case EditorActionKind.SET_STATE:

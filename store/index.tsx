@@ -21,7 +21,7 @@ const useStore = create<NoteStore>()(
         globalLoading: loading,
       });
     },
-    sidebarOpen: true,
+    sidebarOpen: false,
     setSidebarOpen(arg) {
       set((prev) => ({ sidebarOpen: arg(prev.sidebarOpen) }));
     },

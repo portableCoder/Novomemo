@@ -29,15 +29,26 @@ const Gallery = () => {
   const spring = useSpring({
     x: mode === 0 ? 0 : 2500,
   });
-  const [session, supabase, localMode, notes, setNotes] = useStore(
-    ({ session, supabase, localMode, notes, setNotes }) => [
-      session,
-      supabase,
-      localMode,
-      notes,
-      setNotes,
-    ]
-  );
+  const [session, supabase, localMode, notes, setNotes, isViewing, isEditing] =
+    useStore(
+      ({
+        session,
+        supabase,
+        localMode,
+        notes,
+        setNotes,
+        isEditing,
+        isViewing,
+      }) => [
+        session,
+        supabase,
+        localMode,
+        notes,
+        setNotes,
+        isViewing,
+        isEditing,
+      ]
+    );
   const [refetch, setRefetch] = useState(false);
   const { localNotes } = useLocalNotes();
   useEffect(() => {
@@ -152,36 +163,39 @@ const Gallery = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
   const [parent, _] = useAutoAnimate();
-
+  const isEditorVisible = mode === 0 || isViewing;
   return (
-    <div className="w-full h-full flex flex-col  gap-y-10 px-4 py-2">
-      <div className="flex flex-col  gap-x-2">
-        <Input
-          onChange={(e) => setSearch(e.currentTarget.value)}
-          placeholder="Search..."
-        />
-        {notes.length > 0 && (
-          <NoteFilter
-            onSelectChange={(e) => setSort(e)}
-            labels={Array.from(labels)}
-            onChange={(e) => setSelectedLabels(e)}
+    <div className="w-full h-full flex flex-col  gap-y-10 px-2 md:px-4 py-2">
+      {!isEditorVisible && (
+        <div className="flex flex-col  gap-x-2 my-2">
+          <Input
+            onChange={(e) => setSearch(e.currentTarget.value)}
+            placeholder="Search..."
           />
-        )}
-      </div>
-
-      <div
-        ref={parent}
-        className="w-full grid grid-cols-1 md:grid-cols-3 gap-4 h-full"
-      >
-        {loading && new Array(6).fill(0).map((_, i) => <Skeleton key={i} />)}
-        {!error &&
-          !loading &&
-          searched
-            .filter(filterFn)
-            .filter(labelFn)
-            .sort(sortFn)
-            .map((el) => <NoteCard key={el.id} note={el} />)}
-      </div>
+          {notes.length > 0 && (
+            <NoteFilter
+              onSelectChange={(e) => setSort(e)}
+              labels={Array.from(labels)}
+              onChange={(e) => setSelectedLabels(e)}
+            />
+          )}
+        </div>
+      )}
+      {!isEditorVisible && (
+        <div
+          ref={parent}
+          className="w-full grid grid-cols-1 md:grid-cols-3 gap-4 h-full"
+        >
+          {loading && new Array(6).fill(0).map((_, i) => <Skeleton key={i} />)}
+          {!error &&
+            !loading &&
+            searched
+              .filter(filterFn)
+              .filter(labelFn)
+              .sort(sortFn)
+              .map((el) => <NoteCard key={el.id} note={el} />)}
+        </div>
+      )}
       {error && (
         <button
           className="flex gap-x-2 text-red-400 items-center justify-center"
@@ -191,10 +205,13 @@ const Gallery = () => {
         </button>
       )}
       <animated.div
+        ref={parent}
         style={spring}
-        className="w-full h-full fixed flex flex-col gap-y-3 top-0 left-0 z-50 px-4 bg-zinc-900"
+        className="w-full h-full  flex flex-col gap-y-3 z-50 px-4 bg-zinc-900"
       >
-        <NoteEditor refetch={() => setRefetch((prev) => !prev)} />
+        {isEditorVisible && (
+          <NoteEditor refetch={() => setRefetch((prev) => !prev)} />
+        )}
       </animated.div>
     </div>
   );

@@ -2,9 +2,9 @@ import { Button } from "@app_types/Button";
 import clsx from "clsx";
 import React from "react";
 
-const MenuButton = ({ icon, children, onClick, active }: Button) => {
+const MenuButton = ({ icon, children, onClick, buttonActive }: Button) => {
   const sel = clsx({
-    "bg-zinc-800": active,
+    "bg-zinc-800": buttonActive,
   });
   return (
     <button

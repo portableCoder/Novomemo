@@ -11,8 +11,6 @@ interface NoteCardProps {
 const NoteCard = ({ note }: NoteCardProps) => {
   const icons = [
     [Star, note.favorite, "Favorite"],
-    ["MD", note.editor === "markdown", "Markdown"],
-    [Type, note.editor === "wysiwyg", "Editor"],
     [Archive, note.archived, "Archived"],
   ] as [Icon | string, boolean, string][];
   const [
@@ -37,7 +35,7 @@ const NoteCard = ({ note }: NoteCardProps) => {
     s.setNotes,
   ]);
 
-  const { localNotes, setLocalNotes } = useLocalNotes();
+  const { setLocalNotes } = useLocalNotes();
   return (
     <div className=" bg-zinc-800 justify-between   outline-zinc-700 outline outline-2 text-white rounded-md w-full flex  p-2">
       <div className="flex flex-col gap-y-3">

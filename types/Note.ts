@@ -5,6 +5,5 @@ type Note = {
     labels: string[],
     favorite: boolean,
     archived: boolean,
-    editor: "markdown" | "wysiwyg"
     id: number
 }
